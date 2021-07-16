@@ -10,7 +10,7 @@ export default function Post({ page, blocks }) {
   }
 
   return (
-    <BlogLayout data={page} content={blocks}>
+    <BlogLayout data={page}>
       <span className="text-sm text-gray-700">
         {new Date(page.created_time).toLocaleString('en-US', {
           month: 'short',
@@ -33,20 +33,20 @@ export default function Post({ page, blocks }) {
             return <Text text={value.text} id={id} key={id} />
 
           case 'heading_1':
-            return <Heading text={text} id={id} level={type} key={id} />
+            return <Heading text={text} level={type} key={id} />
 
           case 'heading_2':
-            return <Heading text={text} id={id} level={type} key={id} />
+            return <Heading text={text} level={type} key={id} />
 
           case 'heading_3':
-            return <Heading text={text} id={id} level={type} key={id} />
+            return <Heading text={text} level={type} key={id} />
 
           case 'bulleted_list_item':
           case 'numbered_list_item':
             return <ListItem key={id} text={value.text} id={id} />
 
           case 'to_do':
-            return <ToDo key={id} value={value} text={value.text} />
+            return <ToDo key={id} id={id} value={value} text={value.text} />
 
           case 'toggle':
             return <Toggle key={id} text={value.text} children={value.children} />
@@ -63,12 +63,16 @@ export default function Post({ page, blocks }) {
 
 export const getStaticPaths = async () => {
   const database = await getNotionData(databaseId)
+
   return {
-    paths: database.map((page) => ({
-      params: {
-        slug: page.properties.Slug.rich_text[0].plain_text,
-      },
-    })),
+    paths: database.map((page) => {
+      if ('rich_text' in page.properties.Slug)
+        return {
+          params: {
+            slug: page.properties.Slug.rich_text[0].plain_text,
+          },
+        }
+    }),
     fallback: false,
   }
 }
@@ -76,7 +80,10 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context) => {
   const { slug } = context.params
   const database = await getNotionData(databaseId)
-  const filter = database.filter((blog) => blog.properties.Slug.rich_text[0].plain_text === slug)
+  const filter = database.filter(
+    (blog) =>
+      'rich_text' in blog.properties.Slug && blog.properties.Slug.rich_text[0].plain_text === slug
+  )
   const page = await getPage(filter[0].id)
   const blocks = await getBlocks(filter[0].id)
 

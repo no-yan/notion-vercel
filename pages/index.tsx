@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getNotionData } from '../lib/getNotionData'
 
 export default function Home({ posts }) {
+  console.log(posts)
   return (
     <Container>
       <div className="max-w-2xl mx-auto mb-16">
