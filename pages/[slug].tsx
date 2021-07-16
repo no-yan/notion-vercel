@@ -66,12 +66,20 @@ export const getStaticPaths = async () => {
 
   return {
     paths: database.map((page) => {
-      if ('rich_text' in page.properties.Slug)
-        return {
-          params: {
-            slug: page.properties.Slug.rich_text[0].plain_text,
-          },
-        }
+      switch (page.properties.Slug.type) {
+        case 'rich_text':
+          return {
+            params: {
+              slug: page.properties.Slug.rich_text[0].plain_text,
+            },
+          }
+        default:
+          return {
+            params: {
+              slug: null,
+            },
+          }
+      }
     }),
     fallback: false,
   }
@@ -80,10 +88,11 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context) => {
   const { slug } = context.params
   const database = await getNotionData(databaseId)
-  const filter = database.filter(
-    (blog) =>
-      'rich_text' in blog.properties.Slug && blog.properties.Slug.rich_text[0].plain_text === slug
-  )
+  const filter = database.filter((blog) => {
+    if (blog.properties.Slug.type === 'rich_text') {
+      return blog.properties.Slug.rich_text[0].plain_text === slug
+    }
+  })
   const page = await getPage(filter[0].id)
   const blocks = await getBlocks(filter[0].id)
 
