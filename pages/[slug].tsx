@@ -49,7 +49,11 @@ export default function Post({ page, blocks }) {
             return <ToDo key={id} id={id} value={value} text={value.text} />
 
           case 'toggle':
-            return <Toggle key={id} text={value.text} children={value.children} />
+            return (
+              <Toggle key={id} text={value.text}>
+                {value.children}
+              </Toggle>
+            )
 
           default:
             return `Unsupported block (${
