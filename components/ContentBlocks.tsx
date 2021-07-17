@@ -83,7 +83,7 @@ export const Toggle = ({ text, children }) => {
   return (
     <details>
       <summary className="cursor-pointer">{text[0].text.content}</summary>
-      {children?.map((block) => {
+      {children.map((block) => {
         if (block.type === 'paragraph') {
           return <Text key={block.id} text={block.paragraph.text} id={block.id} />
         }
